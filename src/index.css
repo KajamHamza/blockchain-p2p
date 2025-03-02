@@ -1,0 +1,129 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    overflow-x: hidden;
+  }
+
+  /* Typography enhancements */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-medium tracking-tight;
+  }
+  
+  /* Glass morphism utility */
+  .glass {
+    @apply bg-white/80 backdrop-blur-lg shadow-glass border border-white/20;
+  }
+  
+  /* Animation classes */
+  .smooth-transition {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  
+  /* Peer-specific colors */
+  .peer-1-bg { @apply bg-blockchain-peer-1 text-white; }
+  .peer-2-bg { @apply bg-blockchain-peer-2 text-white; }
+  .peer-3-bg { @apply bg-blockchain-peer-3 text-white; }
+  .peer-4-bg { @apply bg-blockchain-peer-4 text-white; }
+  
+  .peer-1-text { @apply text-blockchain-peer-1; }
+  .peer-2-text { @apply text-blockchain-peer-2; }
+  .peer-3-text { @apply text-blockchain-peer-3; }
+  .peer-4-text { @apply text-blockchain-peer-4; }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400;
+  }
+}
+
+/* Block and transaction animations */
+@keyframes confirm {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.confirm-animation {
+  animation: confirm 0.5s ease-in-out;
+}
+
+/* Mining animation */
+.mining-sparkle {
+  position: relative;
+}
+
+.mining-sparkle::before,
+.mining-sparkle::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.8), transparent);
+  background-size: 200% 200%;
+  animation: mining-sparkle 2s linear infinite;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+@keyframes mining-sparkle {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 200% 200%; }
+}
