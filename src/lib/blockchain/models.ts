@@ -1,5 +1,5 @@
-/* eslint-disable no-case-declarations */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-case-declarations */
 import { hash, generateMerkleRoot, sign, verify } from './crypto';
 
 export interface UTXO {
@@ -83,7 +83,9 @@ export function createTransaction(
   let inputSum = 0;
   const selectedUtxos: UTXO[] = [];
   
-  for (const utxo of utxoSet) {
+  const sortedUtxos = [...utxoSet].sort((a, b) => a.amount - b.amount);
+  
+  for (const utxo of sortedUtxos) {
     if (utxo.address === senderWallet.address) {
       selectedUtxos.push(utxo);
       inputSum += utxo.amount;

@@ -1,13 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import React, { useState } from 'react';
-import { SmartContract, Peer, createSmartContract, createContractDeploymentTransaction } from '@/lib/blockchain/models';
+import { SmartContract, Peer, executeSmartContract } from '@/lib/blockchain/models';
 import { toast } from '@/components/ui/use-toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 
 interface SmartContractsViewProps {
   peer: Peer;
@@ -20,60 +20,10 @@ const SmartContractsView: React.FC<SmartContractsViewProps> = ({
   onDeploy,
   onExecute
 }) => {
-  const [contractName, setContractName] = useState('');
-  const [contractType, setContractType] = useState<'token' | 'storage' | 'auction' | 'custom'>('token');
-  const [contractCode, setContractCode] = useState('');
-  
   // For contract execution
   const [selectedContract, setSelectedContract] = useState<SmartContract | null>(null);
   const [methodName, setMethodName] = useState('');
   const [methodParams, setMethodParams] = useState('');
-  
-  const handleDeploy = () => {
-    if (!peer.wallet) {
-      toast({
-        title: "Error",
-        description: "Wallet not activated for this peer",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (!contractName.trim()) {
-      toast({
-        title: "Error",
-        description: "Contract name is required",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    try {
-      const contract = createSmartContract(
-        contractType,
-        contractName,
-        contractCode,
-        peer.wallet.address
-      );
-      
-      onDeploy(contract);
-      
-      toast({
-        title: "Success",
-        description: `Contract ${contractName} deployed successfully`,
-      });
-      
-      // Reset form
-      setContractName('');
-      setContractCode('');
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to deploy contract",
-        variant: "destructive"
-      });
-    }
-  };
   
   const handleExecute = () => {
     if (!selectedContract) {
@@ -112,16 +62,6 @@ const SmartContractsView: React.FC<SmartContractsViewProps> = ({
     }
   };
   
-  const getContractTypeDescription = (type: string) => {
-    switch(type) {
-      case 'token': return 'ERC-20 like token with transfer and balance functions';
-      case 'storage': return 'Key-value storage contract';
-      case 'auction': return 'Simple auction contract';
-      case 'custom': return 'Custom contract with your own code';
-      default: return '';
-    }
-  };
-  
   const renderContractMethodsHint = (type: string) => {
     switch(type) {
       case 'token': 
@@ -152,7 +92,14 @@ const SmartContractsView: React.FC<SmartContractsViewProps> = ({
                   <div key={contract.address} className="bg-gray-50 p-3 rounded-md">
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-medium">{contract.name}</span>
-                      <span className="text-xs bg-gray-200 px-2 py-1 rounded">{contract.type}</span>
+                      <div className="flex gap-2 items-center">
+                        <Badge variant="outline" className="text-xs bg-gray-200 rounded">
+                          {contract.type}
+                        </Badge>
+                        <Badge variant="secondary" className="text-xs">
+                          Auto-deployed
+                        </Badge>
+                      </div>
                     </div>
                     <div className="text-xs font-mono mb-2 truncate">
                       {contract.address}
@@ -176,6 +123,9 @@ const SmartContractsView: React.FC<SmartContractsViewProps> = ({
                       <DialogContent>
                         <DialogHeader>
                           <DialogTitle>Execute Contract: {contract.name}</DialogTitle>
+                          <DialogDescription>
+                            Enter method name and parameters to execute this contract
+                          </DialogDescription>
                         </DialogHeader>
                         
                         <div className="space-y-4 py-4">
@@ -214,63 +164,6 @@ const SmartContractsView: React.FC<SmartContractsViewProps> = ({
                 <p className="text-gray-500">No contracts deployed yet</p>
               </div>
             )}
-          </div>
-          
-          <div className="border-t pt-4">
-            <h3 className="text-md font-medium mb-3">Deploy New Contract</h3>
-            
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label htmlFor="contractName">Contract Name</Label>
-                  <Input 
-                    id="contractName"
-                    value={contractName}
-                    onChange={(e) => setContractName(e.target.value)}
-                    placeholder="MyToken"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="contractType">Contract Type</Label>
-                  <Select 
-                    value={contractType} 
-                    onValueChange={(value) => setContractType(value as any)}
-                  >
-                    <SelectTrigger id="contractType">
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="token">Token</SelectItem>
-                      <SelectItem value="storage">Storage</SelectItem>
-                      <SelectItem value="auction">Auction</SelectItem>
-                      <SelectItem value="custom">Custom</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div>
-                <p className="text-xs text-gray-500 mb-1">{getContractTypeDescription(contractType)}</p>
-                
-                {contractType === 'custom' && (
-                  <div className="mt-3">
-                    <Label htmlFor="contractCode">Contract Code</Label>
-                    <Textarea 
-                      id="contractCode"
-                      value={contractCode}
-                      onChange={(e) => setContractCode(e.target.value)}
-                      placeholder="// Your contract code here"
-                      rows={5}
-                    />
-                  </div>
-                )}
-              </div>
-              
-              <Button onClick={handleDeploy} className="w-full">
-                Deploy Contract
-              </Button>
-            </div>
           </div>
         </>
       ) : (

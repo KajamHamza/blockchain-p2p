@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import crypto from 'crypto-js';
 import elliptic from 'elliptic';
 
@@ -15,8 +16,6 @@ export function generateKeyPair() {
 
 // Create a wallet address from public key (simplified)
 export function generateAddress(publicKey: string): string {
-  // In a real blockchain, we'd do more complex operations
-  // For now, we'll just take a hash and shorten it
   return crypto.RIPEMD160(publicKey).toString().substring(0, 40);
 }
 
@@ -56,6 +55,5 @@ export function generateMerkleRoot(txHashes: string[]): string {
     newLevel.push(combinedHash);
   }
   
-  // Recursively build the tree
   return generateMerkleRoot(newLevel);
 }

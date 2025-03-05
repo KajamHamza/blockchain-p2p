@@ -1,5 +1,5 @@
 
-import { Peer, Transaction, Block, UTXO, Wallet, SmartContract, createGenesisBlock, finalizeGenesisBlock } from './models';
+import { Peer, Transaction, Block, UTXO, Wallet, SmartContract, createGenesisBlock, finalizeGenesisBlock, createSmartContract } from './models';
 
 // Local storage keys
 export const PEERS_STORAGE_KEY = 'blockchain_peers';
@@ -42,7 +42,7 @@ export function createPeer(id: number, port: number): Peer {
   };
 }
 
-// Create a new wallet for a peer
+// Create a new wallet for a peer and automatically deploy standard contracts
 export function createWalletForPeer(peer: Peer, publicKey: string, privateKey: string, address: string, port: number): Peer {
   peer.wallet = {
     publicKey,
@@ -53,6 +53,14 @@ export function createWalletForPeer(peer: Peer, publicKey: string, privateKey: s
   };
   
   peer.isActive = true;
+  
+  // Auto-deploy standard contracts
+  const tokenContract = createSmartContract('token', `${address.substring(0, 6)}Token`, '', address);
+  const storageContract = createSmartContract('storage', `${address.substring(0, 6)}Storage`, '', address);
+  const auctionContract = createSmartContract('auction', `${address.substring(0, 6)}Auction`, '', address);
+  
+  peer.contracts = [tokenContract, storageContract, auctionContract];
+  
   return peer;
 }
 
@@ -157,7 +165,7 @@ export function getUTXOSet(peer: Peer): UTXO[] {
   // Process blocks in chronological order
   for (const block of peer.blockchain) {
     for (const tx of block.transactions) {
-      // Mark inputs as spent
+      
       for (const input of tx.inputs) {
         const outpointKey = `${input.txId}:${input.outputIndex}`;
         spentOutputs[outpointKey] = true;
